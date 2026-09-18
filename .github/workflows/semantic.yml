@@ -13,7 +13,6 @@ jobs:
   release:
     name: Release Version
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         id: checkout
@@ -28,4 +27,3 @@ jobs:
           semantic_version: 23
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-
