@@ -8,6 +8,7 @@ Projet d'examen 5DEEP : classification de scènes en six classes (Building, Fore
 |---|---|
 | [docs/SUJET.md](docs/SUJET.md) | Consignes officielles de l'examen (référence). |
 | [docs/GESTION_DE_PROJET.md](docs/GESTION_DE_PROJET.md) | Découpage en 3 lots parallèles, décisions techniques, contrat d'interface `src/`, workflow Git, planning par sprints, Definition of Done, checklist de rendu, risques. |
+| [docs/ARCHITECTURE_CNN.md](docs/ARCHITECTURE_CNN.md) | Modélisation du CNN de base (schémas Mermaid, tableau des couches, hyperparamètres exposés), variantes CAM et pré-entraînée. |
 | [docs/backlog/LOT_A_donnees_cnn.md](docs/backlog/LOT_A_donnees_cnn.md) | Lot A — Données, exploration, CNN de base (Q1–Q4, socle commun). |
 | [docs/backlog/LOT_B_optimisation_gradcam.md](docs/backlog/LOT_B_optimisation_gradcam.md) | Lot B — GridSearchCV, augmentation, meilleur modèle, Grad-CAM (Q5–Q7, Bonus 2). |
 | [docs/backlog/LOT_C_transfert_cam_rendu.md](docs/backlog/LOT_C_transfert_cam_rendu.md) | Lot C — Modèle pré-entraîné, CAM, photos personnelles, assemblage et export (Q8, Q9, Bonus 1). |
