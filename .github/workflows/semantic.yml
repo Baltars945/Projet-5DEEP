@@ -4,7 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches:
-      -main
+      - main
+
 permissions:
   contents: write
 
@@ -14,16 +15,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      name: Checkout
-      id: checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        fetch-tags: true
-        
-      name: Semantic Release
-      uses: cycjimmy/semantic-release-action@v4
-      with:
-        semantic_version: 23
-      env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          semantic_version: 23
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
