@@ -25,6 +25,7 @@ from pathlib import Path
 
 REPO = "Baltars945/Projet-5DEEP"
 OWNER = REPO.split("/")[0]
+PROJECT_OWNER = None  # compte authentifie, resolu au lancement (gh api user)
 PROJECT_TITLE = "Projet 5DEEP — Backlog"
 BACKLOG_DIR = Path(__file__).resolve().parent.parent / "docs" / "backlog"
 
@@ -110,16 +111,24 @@ def ensure_milestones(dry_run: bool) -> dict[str, str]:
 
 
 def ensure_project(dry_run: bool) -> str | None:
+    """Cree le tableau sous le compte authentifie et le lie au depot."""
     print("Tableau Projects…")
     if dry_run:
-        print(f"  $ gh project create --owner {OWNER} --title \"{PROJECT_TITLE}\"")
+        print(f"  $ gh project create --owner @me --title \"{PROJECT_TITLE}\"")
         return None
-    out = gh("project", "list", "--owner", OWNER, "--format", "json")
+    out = gh("project", "list", "--owner", PROJECT_OWNER, "--format", "json")
+    number = None
     for p in json.loads(out).get("projects", []):
         if p["title"] == PROJECT_TITLE:
-            return str(p["number"])
-    out = gh("project", "create", "--owner", OWNER, "--title", PROJECT_TITLE, "--format", "json")
-    return str(json.loads(out)["number"])
+            number = str(p["number"])
+    if number is None:
+        out = gh("project", "create", "--owner", PROJECT_OWNER, "--title", PROJECT_TITLE, "--format", "json")
+        number = str(json.loads(out)["number"])
+    try:
+        gh("project", "link", number, "--owner", PROJECT_OWNER, "--repo", REPO)
+    except RuntimeError as e:
+        print("  ! liaison au depot impossible (le tableau doit appartenir au proprietaire du depot) :", str(e).strip().splitlines()[-1])
+    return number
 
 
 def issue_body(t: dict, lot_label: str, lot_name: str, source: str) -> str:
@@ -142,9 +151,11 @@ def main() -> int:
     ap.add_argument("--no-project", action="store_true")
     args = ap.parse_args()
 
+    global PROJECT_OWNER
     if not args.dry_run:
         try:
             gh("auth", "status")
+            PROJECT_OWNER = gh("api", "user", "--jq", ".login")
         except (RuntimeError, FileNotFoundError):
             print("gh introuvable ou non authentifié : `gh auth login --scopes repo,project`")
             return 1
@@ -172,13 +183,13 @@ def main() -> int:
                 cmd += ["--milestone", ms]
             url = gh(*cmd, dry_run=args.dry_run)
             if project and url:
-                gh("project", "item-add", project, "--owner", OWNER, "--url", url)
+                gh("project", "item-add", project, "--owner", PROJECT_OWNER, "--url", url)
             print("  +", title[:90], "->", url or "(dry-run)")
             total += 1
 
     print(f"\n{total} issues {'simulées' if args.dry_run else 'créées'}.")
     if project:
-        print(f"Tableau : https://github.com/users/{OWNER}/projects/{project}")
+        print(f"Tableau : https://github.com/users/{PROJECT_OWNER}/projects/{project}")
     return 0
 
 
