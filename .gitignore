@@ -1,2 +1,11 @@
 .venv/
 .idea/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+data/*
+models/*
+
+figures/*
+*.zip
