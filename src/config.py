@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-# seedPath
+# seed
 
 SEED: int = 42
 
@@ -79,6 +79,7 @@ NOTEBOOKS_DIR: Path = ROOT_DIR / "notebooks"
 MODELS_DIR: Path = ROOT_DIR / "models"
 PHOTOS_DIR: Path = ROOT_DIR / "photos"
 SOURCE_DIR: Path = ROOT_DIR / "src"
+GRAPH_DIR: Path = ROOT_DIR / "graph"
 
 if __name__ == "__main__":
     setSeed()
