@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-# seedPath
+# seed
 
 SEED: int = 42
 
@@ -52,7 +52,7 @@ IMG_SIZE: tuple[int, int] = (128, 128)
 IMG_CHANNELS: int = 3
 INPUT_SHAPE: tuple[int, int, int] = (IMG_CHANNELS, *IMG_SIZE)
 
-IMAGENET_MEAN: tuple[float, float, float] = (0.485, 0.486, 0.406)
+IMAGENET_MEAN: tuple[float, float, float] = (0.485, 0.456, 0.406)
 IMAGENET_STD: tuple[float, float, float] = (0.229, 0.224, 0.225)
 
 CLASSES: list[str] = [
