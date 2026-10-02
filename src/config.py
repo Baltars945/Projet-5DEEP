@@ -24,7 +24,7 @@ def setSeed(seed: int = SEED, deterministic: bool = True) -> None:
         torch.backends.cudnn.benchmark = False
 
 
-def seedWorker() -> None:
+def seedWorker(worker_id: int) -> None:
     worker_seed = torch.initial_seed() % 2 ** 32
     np.random.seed(worker_seed)
     random.seed(worker_seed)
@@ -53,7 +53,7 @@ IMG_CHANNELS: int = 3
 INPUT_SHAPE: tuple[int, int, int] = (IMG_CHANNELS, *IMG_SIZE)
 
 IMAGENET_MEAN: tuple[float, float, float] = (0.485, 0.486, 0.406)
-IMAGENET_STD: tuple[float, float, float] = (0.229, 0, 224, 0.225)
+IMAGENET_STD: tuple[float, float, float] = (0.229, 0.224, 0.225)
 
 CLASSES: list[str] = [
     "buildings",
