@@ -79,6 +79,7 @@ NOTEBOOKS_DIR: Path = ROOT_DIR / "notebooks"
 MODELS_DIR: Path = ROOT_DIR / "models"
 PHOTOS_DIR: Path = ROOT_DIR / "photos"
 SOURCE_DIR: Path = ROOT_DIR / "src"
+FIGURES_DIR: Path = ROOT_DIR / "figures"
 
 if __name__ == "__main__":
     setSeed()
