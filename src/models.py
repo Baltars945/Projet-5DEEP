@@ -5,6 +5,7 @@ from torch import nn
 from src.config import IMG_CHANNELS, IMG_SIZE, NUM_CLASSES
 
 def convBlock(inChannels: int, outChannels: int, useBatchnorm: bool = True) -> nn.Sequential:
+    """Crée un bloc de convolution avec une couche Conv2d, une activation ReLU et un MaxPool2d."""
     layers: list[nn.Module] = [
         nn.Conv2d(inChannels, outChannels, kernel_size=3, stride=1, padding=1)
     ]
