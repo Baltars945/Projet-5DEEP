@@ -15,7 +15,7 @@ def convBlock(inChannels: int, outChannels: int, useBatchnorm: bool = True) -> n
     return nn.Sequential(*layers)
 
 class BaselineCNN(nn.Module):
- 
+    """Un CNN simple pour la classification d'images."""
     def __init__(
         self,
         num_classes: int = NUM_CLASSES,
