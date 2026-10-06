@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-# seedPath
+# seed
 
 SEED: int = 42
 
