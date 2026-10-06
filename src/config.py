@@ -24,7 +24,8 @@ def setSeed(seed: int = SEED, deterministic: bool = True) -> None:
         torch.backends.cudnn.benchmark = False
 
 
-def seedWorker() -> None:
+def seedWorker(worker_id: int) -> None:
+    del worker_id
     worker_seed = torch.initial_seed() % 2 ** 32
     np.random.seed(worker_seed)
     random.seed(worker_seed)
@@ -52,8 +53,8 @@ IMG_SIZE: tuple[int, int] = (128, 128)
 IMG_CHANNELS: int = 3
 INPUT_SHAPE: tuple[int, int, int] = (IMG_CHANNELS, *IMG_SIZE)
 
-IMAGENET_MEAN: tuple[float, float, float] = (0.485, 0.486, 0.406)
-IMAGENET_STD: tuple[float, float, float] = (0.229, 0, 224, 0.225)
+IMAGENET_MEAN: tuple[float, float, float] = (0.485, 0.456, 0.406)
+IMAGENET_STD: tuple[float, float, float] = (0.229, 0.224, 0.225)
 
 CLASSES: list[str] = [
     "buildings",
@@ -81,6 +82,12 @@ PHOTOS_DIR: Path = ROOT_DIR / "photos"
 SOURCE_DIR: Path = ROOT_DIR / "src"
 FIGURES_DIR: Path = ROOT_DIR / "figures"
 
+FAST_RUN: bool = os.environ.get("FAST_RUN", "0") not in ["0", "false", "False"]
+FAST_RUN_SUBSET: int = 2000
+FAST_RUN_EPOCHS: int = 2
+
+# MODEL_DIR: Path = MODELS_DIR
+
 if __name__ == "__main__":
     setSeed()
     print(f"SEED            : {SEED}")
@@ -93,3 +100,5 @@ if __name__ == "__main__":
     print(f"MODELS_DIR      : {MODELS_DIR}")
     print(f"PHOTOS_DIR      : {PHOTOS_DIR}")
     print(f"SOURCE_DIR      : {SOURCE_DIR}")
+    print(f"FAST_RUN        : {FAST_RUN}")
+    print(f"FIGURES_DIR     : {FIGURES_DIR}")
