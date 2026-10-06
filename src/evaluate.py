@@ -1,10 +1,8 @@
 from __future__ import annotations
-from os import name
 from pathlib import Path
 import json
 import matplotlib.pyplot as plt
 import numpy as np
-from pymupdf import name
 import torch
 from matplotlib.figure import Figure
 from sklearn.metrics import (
