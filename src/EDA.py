@@ -1,6 +1,6 @@
-from data import inteldataset,load_datasets
+from src.data import inteldataset,load_datasets
 import numpy as np
-from config import (FIGURES_DIR,CLASSES,setSeed,NUM_CLASSES,SEED,IMG_SIZE,SOURCE_IMG_SIZE
+from src.config import (FIGURES_DIR,CLASSES,setSeed,NUM_CLASSES,SEED,IMG_SIZE,SOURCE_IMG_SIZE
                     ,IMAGENET_MEAN)
 import matplotlib.pyplot as plt
 

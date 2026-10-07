@@ -1,47 +1,16 @@
-from config import DEVICE,NUM_CLASSES,SEED,IMG_SIZE,setSeed,seedWorker,getGenerator
-from data import load_datasets
+from src.config import DEVICE,SEED,setSeed,seedWorker,getGenerator, FIGURES_DIR, MODELS_DIR, CLASSES
+from src.model_io import saveModel, checkRoundTrip
+from src.evaluate import evaluateModel, metricsSummary, saveMetrics, plotHistory, pltConfusionMatrix
+from src.data import load_datasets, trainAugmentation
+from src.models import BaselineCNN, buildBaseline, summarizeModel
+from src.tuning import gridSearch, searchResults, saveSearch, splitBestParams
 import copy 
 import time
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-class BaselineCNN(nn.Module):
 
-    def __init__(self, num_classes: int = NUM_CLASSES, dropout1: float = 0.5,
-                 dropout2: float = 0.3):
-        super().__init__()
-
-        def block(c_in,c_out):
-            return nn.Sequential(
-                nn.Conv2d(c_in,c_out,kernel_size=3,padding=1),
-                nn.BatchNorm2d(c_out),
-                nn.ReLU(inplace=True),
-                nn.MaxPool2d(2),
-            )
-        self.features = nn.Sequential(
-            block(3,32),
-            block(32,64),
-            block(64,128),
-            block(128,256)
-        )
-
-        flat_dim = 256 * (IMG_SIZE[0] // 16) * (IMG_SIZE[1] // 16)
-
-        self.classifier= nn.Sequential(
-            nn.Flatten(),
-            nn.Linear(flat_dim, 256),
-            nn.ReLU(inplace=True),
-        nn.Dropout(dropout1),
-            nn.Linear(256,128),
-            nn.ReLU(inplace=True),
-            nn.Dropout(dropout2),
-           nn.Linear(128,num_classes)
-        )
-
-    def forward(self,x):
-        return self.classifier(self.features(x))
-    
 def makeLoaders(train_ds,val_ds,test_ds,batch_size: int =64,  num_workers: int = 2, seed: int = SEED):
     common = dict(
         batch_size=batch_size,
@@ -128,13 +97,41 @@ def fit_model(model,train_loader, val_loader, epochs: int = 30, lr: float = 1e-3
 
 if __name__== "__main__":
     setSeed()
+
+    # Recherche sur des donnees NON augmentees : gridSearch ne fait que decouper
+    # des indices sur un seul dataset, donc le fold de validation de chaque split
+    # heriterait de l'augmentation et fausserait le classement des combinaisons.
     train_ds,val_ds,test_ds = load_datasets()
+
+    search = gridSearch(train_ds, cv=3, max_epochs=5, subset=2000)
+    print(f"meilleur score CV ({search.scoring}) : {search.best_score_:.4f}")
+    print(f"meilleurs parametres : {search.best_params_}")
+    for row in searchResults(search):
+        print(f"  rank {row['rank']:>2} | {row['mean_test_score']:.4f} +/- {row['std_test_score']:.4f}")
+    saveSearch(search, MODELS_DIR / "gridsearch_results.json")
+
+    module_params, fit_params = splitBestParams(search.best_params_)
+    name = "baseline_cnn"
+
+    # Augmentation activee pour le re-entrainement final uniquement (split train).
+    # Le dataset HuggingFace est en cache : ce second appel ne retelecharge rien.
+    train_ds,val_ds,test_ds = load_datasets(train_transform=trainAugmentation())
     train_loader, val_loader, test_loader = makeLoaders(train_ds,val_ds,test_ds)
 
-    model= BaselineCNN()
-    print("param : ", sum(p.numel() for p in model.parameters()))
+    model = BaselineCNN(**module_params)
+    print(summarizeModel(model))
 
-    model, history = fit_model(model,train_loader,val_loader,epochs=30,lr=1e-3,patience=5)
-    print(f"meilleur epoch : {history['best_epoch']} |"
-          f"val loss {history['best_val_loss']:.4f} | "
-          f"val acc {history['val_acc'][history['best_epoch'] - 1]:.3f}")
+    model, history = fit_model(model,train_loader,val_loader,epochs=30,lr=fit_params['lr'],patience=5)
+    path = saveModel(model,name)
+    print(f"model saved to {path}")
+
+    metrics = evaluateModel(model,test_loader)
+    print(metricsSummary(name,metrics))
+
+    saveMetrics(metrics,MODELS_DIR/f"{name}_metrics.json")
+
+    plotHistory(history,title=name,save_path=FIGURES_DIR/f"{name}_history.png")
+    pltConfusionMatrix(metrics["confusion_matrix"],CLASSES,title=name,save_path=FIGURES_DIR/f"{name}_confusion_matrix.png")
+
+    sample, _ = test_ds[0]
+    checkRoundTrip(model,buildBaseline,name,sample.unsqueeze(0))

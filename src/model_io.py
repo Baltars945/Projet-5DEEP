@@ -8,7 +8,7 @@ from torch import nn
 import torch 
 from PIL import Image, ImageOps
 from torchvision import transforms
-from src.config import DEVICE, MODELS_DIR, CLASSES, IMAGENET_MEAN, IMAGENET_STD, IMG_SIZE
+from src.config import DEVICE, MODELS_DIR, CLASSES, IMG_SIZE
 
 def modelPath(name: str | Path, models_dir: Path = MODELS_DIR) -> Path:
     """Return the path to the model file."""
@@ -85,11 +85,16 @@ def loadModel(builder: Callable[..., nn.Module],  name: str | Path,  device: tor
     return model
 
 def defaultTransform(img_size: tuple[int, int] = IMG_SIZE) -> Callable:
-    """Return a default transform for images."""
+    """Transform d'inference, identique au pipeline de base de inteldataset.
+
+    Pas de Normalize : les donnees d'entrainement n'en recoivent pas non plus
+    (cf. inteldataset.base dans src/data.py) et le premier BatchNorm2d de
+    BaselineCNN assure deja le centrage. Normaliser ici creerait un ecart
+    train/inference qui degraderait silencieusement predictImage.
+    """
     return transforms.Compose([
         transforms.Resize(img_size),
         transforms.ToTensor(),
-        transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
     ])
 
 def loadImage(path: str | Path, transform: Callable | None = None, device: torch.device = DEVICE) -> torch.Tensor:

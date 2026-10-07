@@ -42,20 +42,20 @@ def evaluateModel(model, loader, device=DEVICE, class_names=None) -> dict:
 
     avg_loss = total_loss / n_samples if n_samples > 0 else 0
 
-    y_pred = np.concatenate(all_preds)
-    y_true = np.concatenate(all_targets)
+    y_pred = np.asarray(all_preds)
+    y_true = np.asarray(all_targets)
 
     # Calculate metrics
     accuracy = accuracy_score(y_true, y_pred)
-    precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred, labels=labels, average='weighted')
-    report = classification_report(y_true, y_pred, labels=labels, target_names=class_names, output_dict=True)
+    precision, recall, f1, _ = precision_recall_fscore_support(y_true, y_pred, labels=labels, average='weighted', zero_division=0)
+    report = classification_report(y_true, y_pred, labels=labels, target_names=class_names, output_dict=True, zero_division=0)
     cm = confusion_matrix(y_true, y_pred, labels=labels)
 
     per_class = {
         name: {
                 "precision": report[name]["precision"],
                 "recall": report[name]["recall"],
-                "f1": report[name]["f1"],
+                "f1": report[name]["f1-score"],
                 "support": report[name]["support"]
         }
         for name in class_names
@@ -96,8 +96,9 @@ def plotHistory(history: dict, title: str | None = None, save_path: Path | None 
     ax_loss.grid()
 
     if save_path:
-        FIGURES_DIR.mkdir(parents=True, exist_ok=True)
-        plt.savefig(save_path)
+        save_path = Path(save_path)
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(save_path, dpi=150, bbox_inches="tight")
 
     return fig
 
@@ -126,14 +127,15 @@ def pltConfusionMatrix(cm: np.ndarray, class_names: list[str], title: str | None
     fig.tight_layout()
 
     if save_path:
-        FIGURES_DIR.mkdir(parents=True, exist_ok=True)
-        plt.savefig(save_path)
+        save_path = Path(save_path)
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(save_path, dpi=150, bbox_inches="tight")
 
     return fig
 
 def metricsSummary(name: str, metrics: dict) -> str:
     summary = f"Model name: {name}\n"
-    summary = f"Loss: {metrics['loss']:.4f}\n"
+    summary += f"Loss: {metrics['loss']:.4f}\n"
     summary += f"Accuracy: {metrics['accuracy']:.4f}\n"
     summary += f"Precision: {metrics['precision']:.4f}\n"
     summary += f"Recall: {metrics['recall']:.4f}\n"
@@ -148,10 +150,17 @@ def metricsSummary(name: str, metrics: dict) -> str:
 
     return summary
 
+def _jsonable(obj):
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    if isinstance(obj, (np.integer, np.floating)):
+        return obj.item()
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
+
 def saveMetrics(metrics: dict, save_path: Path) -> None:
     save_path.parent.mkdir(parents=True, exist_ok=True)
     with open(save_path, 'w') as f:
-        json.dump(metrics, f, indent=4)
+        json.dump(metrics, f, indent=4, default=_jsonable)
     return save_path
 
 def loadMetrics(load_path: Path) -> dict:
