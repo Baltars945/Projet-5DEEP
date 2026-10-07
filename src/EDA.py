@@ -1,6 +1,6 @@
-from data import inteldataset,load_datasets
+from src.data import inteldataset,load_datasets
 import numpy as np
-from config import (GRAPH_DIR,CLASSES,setSeed,NUM_CLASSES,SEED,IMG_SIZE,SOURCE_IMG_SIZE
+from src.config import (FIGURES_DIR,CLASSES,setSeed,NUM_CLASSES,SEED,IMG_SIZE,SOURCE_IMG_SIZE
                     ,IMAGENET_MEAN)
 import matplotlib.pyplot as plt
 
@@ -13,8 +13,8 @@ def raw_image(ds: inteldataset, i: int):
 
 def save_image(fig, name: str, save: bool) -> None:
     if save:
-        GRAPH_DIR.mkdir(parents=True, exist_ok=True)
-        fig.savefig(GRAPH_DIR / f"{name}.png", dpi=150, bbox_inches="tight")
+        FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+        fig.savefig(FIGURES_DIR / f"{name}.png", dpi=150, bbox_inches="tight")
 
 def describe_dataset(train: inteldataset, val: inteldataset, test: inteldataset) -> None:
     total = len(train) + len(val) + len(test)
@@ -54,7 +54,7 @@ def plot_class_distribution(train,val,test,save: bool = True):
     ax1.set_title("Nb images par classes")
     ax1.set_ylabel("images")
     ax2.set_title("proportion par classe")
-    ax2.set_label("%")
+    ax2.set_ylabel("%")
     for ax in (ax1,ax2):
         ax.set_xticks(x,CLASSES,rotation=30)
         ax.legend()
